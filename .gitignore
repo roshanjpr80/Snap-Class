@@ -1,0 +1,44 @@
+# --- Secrets: never commit these ---
+.streamlit/secrets.toml
+.env
+*.env
+.env.*
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+
+# --- Streamlit ---
+.streamlit/cache/
+
+# --- Model weights (downloaded on first run, don't commit) ---
+*.onnx
+*.pt
+*.pth
+models/
+.insightface/
+
+# --- OS / editor cruft ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- Logs ---
+*.log
+
+# --- Python build ---
+build/
+dist/
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- Model/cache files ---
+.cache/
+huggingface_cache/

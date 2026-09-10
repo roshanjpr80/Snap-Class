@@ -1,0 +1,65 @@
+# 1. APPLICATION / UI
+streamlit>=1.49,<2.0
+
+# 2. DATABASE / BACKEND
+supabase>=2.18,<3.0
+
+# 3. DATA PROCESSING
+numpy>=1.26,<3.0
+pandas>=2.2,<3.0
+
+# 4. COMPUTER VISION
+# opencv-python-headless isn't imported by name in our own code, but it's
+# a required companion for insightface's internal image preprocessing —
+# kept explicit rather than left to transitive resolution, since it's a
+# compiled binary package worth being deliberate about.
+opencv-python-headless>=4.10.0.84,<5.0
+Pillow>=10.4,<12.0
+
+# 5. FACE / BIOMETRIC AI
+# <1.0 pin is intentional: insightface 1.0+ restructured its API
+# significantly (new Server/Liveness modules). face_pipeline.py is written
+# against the stable 0.7.x FaceAnalysis API.
+insightface>=0.7.3,<1.0
+onnxruntime>=1.20.1,<2.0               # insightface's inference backend
+
+# 6. AI / DEEP LEARNING
+# CPU-only build — install via the extra index BEFORE this file (see
+# install notes below) to avoid multi-GB CUDA wheels on hosts without a GPU.
+torch>=2.5,<3.0
+torchvision>=0.20,<1.0
+
+# 7. AUDIO / VOICE AI
+librosa>=0.10,<1.0
+soundfile>=0.12,<1.0                 # librosa's audio I/O backend
+
+# Voice recognition
+resemblyzer>=0.1.4,<1.0
+webrtcvad-wheels==2.0.14
+
+# Required because older packages expect pkg_resources
+setuptools<81
+
+# 8. SECURITY / AUTHENTICATION
+bcrypt>=4.3.0,<6.0
+
+# 9. QR CODE
+segno>=1.6,<2.0
+
+# 10. LOGGING
+structlog>=24.4,<26.0
+
+# 1. Install CPU-only torch first, to keep the build fast and avoid
+#    multi-GB CUDA wheels on hosts without a GPU:
+#
+#    pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+#    pip install -r requirements.txt
+#
+# 2. insightface, and its transitive dependency chain (albumentations ->
+#    albucore -> stringzilla), require a C++ compiler to build on Windows.
+#    On Windows, install "Desktop development with C++" via the Visual
+#    Studio Build Tools installer before running pip install.
+#
+# 3. If you later add a GPU-backed host, swap:
+#    onnxruntime          -> onnxruntime-gpu
+#    torch (CPU wheel)    -> torch (CUDA wheel matching your CUDA version)

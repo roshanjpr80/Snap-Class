@@ -1,5 +1,7 @@
 # Snap Class — AI-Powered Attendance System
 
+**Live: [snap-class-attendance-ai-v2.streamlit.app](https://snap-class-attendance-ai-v2.streamlit.app/)**
+
 Attendance in seconds, verified with AI face and voice recognition. Built for teachers and students who are tired of manual roll-calls and proxy attendance.
 
 ---
@@ -22,15 +24,16 @@ Attendance in seconds, verified with AI face and voice recognition. Built for te
 | Layer             | Technology                                            |
 | ----------------- | ----------------------------------------------------- |
 | App / UI          | Streamlit                                             |
+| Hosting           | Streamlit Community Cloud                             |
 | Database          | Supabase (PostgreSQL)                                 |
 | Face recognition  | InsightFace (ArcFace, 512-d embeddings) + onnxruntime |
 | Voice recognition | Resemblyzer + librosa                                 |
 | Auth              | bcrypt password hashing                               |
 | QR codes          | segno                                                 |
 
-Trimmed to exactly what the codebase imports — see [`requirements.txt`](./requirements.txt) for the full list and version pins, with notes on why each one's there.
+Trimmed to exactly what the codebase imports — see [`requirements.txt`](./requirements.txt) for the full list, version pins, and notes on why each one's there.
 
-**Python version: 3.11.** Not 3.12, not 3.13+. InsightFace doesn't ship prebuilt wheels past 3.12, and 3.13/3.14 would force it to compile from source — slow, fragile, and requires a full C++ toolchain. Use 3.11 for local dev _and_ set the same version in Streamlit Community Cloud's deploy settings, so nothing behaves differently between the two.
+**Python version: 3.11** — both locally and in the deployed app's settings. InsightFace doesn't ship prebuilt wheels past 3.12, and 3.13+ forces it to compile from source, which needs a full C++ toolchain. Keeping local and deployed versions identical avoids "works on my machine" surprises.
 
 ---
 
@@ -78,7 +81,7 @@ snapclass/
 
 ---
 
-## Getting Started (Local)
+## Running It Yourself
 
 ### 1. Clone and set up a Python 3.11 environment
 
@@ -93,13 +96,11 @@ py -3.11 -m venv .venv
 
 ### 2. Windows only: install a C++ compiler first
 
-`insightface` (and its dependency chain) needs to compile from source on Windows. Before installing anything:
+`insightface` needs to compile part of its code from source on Windows. Before installing anything:
 
 1. Download [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
 2. In the installer, check **"Desktop development with C++"**
 3. Restart your terminal after install finishes
-
-(macOS/Linux users typically don't need this step — prebuilt wheels are more commonly available there.)
 
 ### 3. Install dependencies
 
@@ -134,14 +135,18 @@ First run downloads the InsightFace model pack (~300MB) — make sure you have i
 
 ---
 
-## Deploying to Streamlit Community Cloud
+## Deploying Your Own Copy
 
-1. Push your repo to GitHub (make sure `.streamlit/secrets.toml` is _not_ included — check `.gitignore`)
+This project is live on Streamlit Community Cloud — here's how to deploy your own instance:
+
+1. Push your repo to GitHub (`.streamlit/secrets.toml` must **not** be included — check `.gitignore`)
 2. Sign in at [share.streamlit.io](https://share.streamlit.io) with GitHub
-3. Click **Create app** → **"Yup, I have an app"** → fill in repo, branch, and `app.py` as the main file path
-4. Choose your **App URL** subdomain — lowercase letters, numbers, and hyphens only. This becomes `https://your-subdomain.streamlit.app`, which is exactly the value you'll use for `APP_BASE_URL`
-5. In **Advanced settings**: set **Python version to 3.11**, and paste your `secrets.toml` contents (with the real deployed URL for `APP_BASE_URL`) into the Secrets box
-6. Click **Deploy** — expect several minutes given the ML dependencies, not seconds
+3. **Create app** → **"Yup, I have an app"** → fill in repo, branch, and `app.py` as the main file path
+4. Choose an **App URL** subdomain — lowercase letters, numbers, and hyphens only, and it must be globally unique (add your name or a number if your first choice is taken)
+5. In **Advanced settings**: set **Python version to 3.11**, and paste your `secrets.toml` contents into the Secrets box, with `APP_BASE_URL` matching the exact subdomain you just chose
+6. Click **Deploy** — expect several minutes given the ML dependencies
+
+**If the install fails:** click "Manage app" to view the full build log. A failure partway through can prevent _later_ packages in `requirements.txt` from installing too, even ones with nothing wrong with them individually — always check the first error in the log, not just the last one reported.
 
 ---
 
@@ -150,7 +155,7 @@ First run downloads the InsightFace model pack (~300MB) — make sure you have i
 - Row Level Security is enabled on every table in `schema.sql`, but the actual policies are placeholders — write real ones matching your auth flow before public use.
 - Face/voice data is biometric data, likely belonging to minors — get real consent flows and a privacy policy in place before any public launch.
 - **Liveness/anti-spoofing is not yet implemented**, for either face or voice. A printed photo or a played-back recording currently passes verification. This is the single highest-priority item before relying on this beyond a supervised classroom pilot.
-- If any secret key was ever pasted somewhere it shouldn't have been (chat, a public repo, etc.), rotate it in Supabase's dashboard — treat it as compromised regardless of where it appeared.
+- If any secret key was ever exposed somewhere it shouldn't have been, rotate it in Supabase's dashboard — treat it as compromised regardless of where it appeared.
 
 ---
 
